@@ -15,7 +15,7 @@ const int encoder_pin1 = 3;
 const int wisim_clk_pin = 7;
 const int whisker_trg_pin = 5;
 const int led_pin = 6;
-const int servo_pin = 10;
+const int servo_pin = 9;
 const unsigned long led_pulse_len_micros = 50000;
 
 // Experiment params

@@ -3,11 +3,12 @@ P.wisim_fps = 10;
 P.duration_trial_secs = 900;
 P.duration_baseline_secs = 30;
 P.period_arduino_clk_secs = 5;
-P.duration_whisker_secs = 0.5;
-P.period_whisker_secs = 43;
-P.offset_visual_secs = 4;
-P.period_visual_secs = 3;  % number of phase steps in visual stim matlab script: 13
+P.offset_visual_secs = 6;
+P.n_visual = 13;
+P.period_visual_secs = 5;  % number of phase steps in visual stim matlab script: 13
 P.duration_visual_secs = 1;  % only controls pulse duration and not stimulus duration
+P.period_whisker_secs = (P.n_visual + 1) * P.period_visual_secs;
+P.duration_whisker_secs = 0.5;
 
 P.daq_dev = 'PXI1slot4';
 %P.daq_dev = 'Dev4';
@@ -41,12 +42,15 @@ for i = 1:numel(whisker_offsets)
 end
 
 visual_dframes = ceil(P.duration_visual_secs * P.wisim_fps);
-visual_offsets = (P.duration_baseline_secs + P.offset_visual_secs : P.period_visual_secs : (P.duration_trial_secs - P.duration_visual_secs)) * P.wisim_fps;
+visual_offsets = ((P.duration_baseline_secs + P.offset_visual_secs) : P.period_visual_secs : (P.duration_trial_secs - P.duration_visual_secs)) * P.wisim_fps;
 for i = 1:numel(visual_offsets)
-    do_table(visual_offsets(i) : visual_offsets(i) + visual_dframes, P.line_visual + 1) = 1;
+    if mod(i, P.n_visual + 1) == 0  % leave out every P.n_visual'th pulse to make space for whisker stim
+        continue;
+    else
+        do_table(visual_offsets(i) : (visual_offsets(i) + visual_dframes), P.line_visual + 1) = 1;
+    end
 end
-
-do_table(((P.duration_baseline_secs + P.offset_visual_secs) * P.wisim_fps) : (P.period_visual_secs  * P.wisim_fps) : end, P.line_visual + 1) = 1;
+%do_table(((P.duration_baseline_secs + P.offset_visual_secs) * P.wisim_fps) : (P.period_visual_secs  * P.wisim_fps) : end, P.line_visual + 1) = 1;
 
 do_table(:, P.line_wisim_led + 1) = 1;
 do_table(end + 1,:) = 0;  % set everything to zero after end of experiment
@@ -88,7 +92,7 @@ outputSingleScan(do_sess, [0 1 0 0]);
 %% Move brush out
 outputSingleScan(do_sess, [0 0 0 0]);
 
-%% Blink LED
+%% Blink IR LED
 outputSingleScan(do_sess, [1 0 0 0]);
 outputSingleScan(do_sess, [0 0 0 0]);
 
@@ -100,4 +104,6 @@ outputSingleScan(do_sess, [0 0 0 0]);
 %% Blink wisim excitation LED
 outputSingleScan(do_sess, [0 0 1 0]);
 pause(0.3);
+
+%%
 outputSingleScan(do_sess, [0 0 0 0]);

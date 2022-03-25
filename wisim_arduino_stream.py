@@ -13,7 +13,7 @@ else:
 
 try:
 	logfile_handle = False
-	ser = serial.Serial('COM6', 115200, timeout=0.1)
+	ser = serial.Serial('COM5', 115200, timeout=0.1)
 	ser.write(b'r')  # reset arduino to "waiting for trigger" state
 	#filename = input("Enter output file name base: ")
 	logfile_handle = open(filename + '.txt', 'w')
@@ -26,6 +26,7 @@ try:
 				if ch == b'q':
 					break
 				elif ch == b'r':
+					print('Sending reset command')
 					ser.write(b'r')
 
 			if ser.in_waiting == 0:
